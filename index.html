@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>B Coin Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #2AABEE; /* Telegram Blue */
+            --secondary: #229ED9; /* Darker Telegram Blue */
+            --bg-dark: #0f172a;
+            --bg-light: #1e293b;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background: linear-gradient(135deg, var(--bg-dark), #16213e);
+            color: white; 
+            height: 100vh; overflow: hidden; 
+            display: flex; flex-direction: column;
+        }
+
+        /* --- UI Elements --- */
+        .glass-panel { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 20px; }
+
+        /* Header */
+        .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.8); z-index: 100; }
+        .user-pill { display: flex; align-items: center; gap: 10px; background: var(--bg-light); padding: 5px 15px 5px 5px; border-radius: 30px; border: 1px solid var(--border); }
+        .u-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(45deg, var(--primary), var(--secondary)); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 14px; }
+        
+        /* Icons */
+        .header-icons { display: flex; align-items: center; gap: 12px; }
+        .head-btn { width: 40px; height: 40px; border-radius: 12px; background: var(--glass); display: flex; justify-content: center; align-items: center; font-size: 18px; border: 1px solid var(--border); cursor: pointer; transition: 0.3s; position: relative; }
+        .head-btn:active { transform: scale(0.9); }
+        .red-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: red; border-radius: 50%; display: none; box-shadow: 0 0 5px red; }
+
+        /* Stage */
+        .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .score-display { text-align: center; margin-bottom: 30px; }
+        .score-display h1 { font-size: 3.5rem; font-weight: 800; background: linear-gradient(to bottom, #fff, #ccc); -webkit-background-clip: text; color: transparent; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
+
+        /* Small B Coin Icon near balance */
+        .small-b-coin {
+            width: 44px;
+            height: 44px;
+            background: radial-gradient(circle at 30% 30%, #5bade0, #2AABEE);
+            border: 3px solid #1e87b9;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
+        }
+
+        /* REALISTIC 3D COIN */
+        .coin-container {
+            perspective: 1000px; /* 3D Depth */
+            z-index: 10;
+        }
+        .coin-wrapper { 
+            width: 280px; height: 280px; 
+            border-radius: 50%; cursor: pointer; 
+            transition: transform 0.1s ease-out; /* Smooth return */
+            box-shadow: 0 20px 60px rgba(42, 171, 238, 0.3); 
+            transform-style: preserve-3d;
+        }
+        .b-coin { 
+            width: 100%; height: 100%; border-radius: 50%; 
+            background: radial-gradient(circle at 30% 30%, #5bade0, #2AABEE); 
+            border: 8px solid #1e87b9; 
+            display: flex; justify-content: center; align-items: center; 
+            position: relative; 
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.4), 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .b-coin::after {
+            content: ''; position: absolute; top:0; left:0; width:100%; height:100%; border-radius:50%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .b-logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 180px; /* B Lorgor Size */
+            font-weight: 800;
+            color: rgba(0, 0, 0, 0.4);
+            /* Engraved 3D text effect */
+            text-shadow: 
+                1px 1px 1px rgba(255, 255, 255, 0.2), /* Top-left highlight */
+                -1px -1px 1px rgba(0, 0, 0, 0.6); /* Bottom-right shadow for depth */
+        }
+
+        /* Electric Mode */
+        .electric-mode { animation: shake 0.5s infinite; box-shadow: 0 0 40px var(--secondary) !important; border-color: #fff !important; }
+        .electric-mode .b-coin { background: radial-gradient(circle at 30% 30%, #87CEEB, #2AABEE) !important; border-color: #fff !important; }
+        .electric-mode .b-logo { color: white; text-shadow: 0 0 10px var(--secondary); }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } 100% { transform: translate(1px, -2px); } }
+
+        /* Energy */
+        .energy-bar { width: 80%; height: 12px; background: rgba(0,0,0,0.5); border-radius: 20px; margin-top: 40px; overflow: hidden; border: 1px solid var(--border); }
+        .fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 100%; transition: width 0.3s; }
+
+        /* Daily Gift */
+        .gift-icon {
+            position: absolute; right: 20px; top: 100px;
+            width: 55px; height: 55px; border-radius: 50%;
+            background: linear-gradient(45deg, #FFD700, #FF8C00);
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px; cursor: pointer;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+            animation: bounce 2s infinite; z-index: 50; border: 2px solid white;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* Pages */
+        .page { position: fixed; top: 70px; left: 0; width: 100%; height: calc(100% - 150px); padding: 20px; overflow-y: auto; display: none; flex-direction: column; gap: 15px; animation: slideUp 0.3s; }
+        .page.active { display: flex; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards & Buttons */
+        .card { display: flex; align-items: center; justify-content: space-between; padding: 15px; }
+        .btn { background: linear-gradient(90deg, var(--primary), var(--secondary)); border: none; padding: 8px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; }
+        .btn:disabled { background: #555; opacity: 0.6; }
+
+        /* Leaderboard */
+        .rank-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--border); }
+        .rank-score { color: var(--primary); font-weight: bold; }
+
+        /* Nav */
+        .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 70px; display: flex; justify-content: space-around; align-items: center; z-index: 200; }
+        .nav-item { font-size: 24px; color: #888; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item span { font-size: 10px; font-weight: 600; }
+        .nav-item.active { color: var(--primary); transform: translateY(-5px); }
+
+        /* Float Text */
+        .float-num { position: absolute; color: white; font-size: 30px; font-weight: 900; pointer-events: none; z-index: 100; text-shadow: 0 0 10px var(--primary); animation: float 0.6s ease-out forwards; }
+        @keyframes float { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
+
+        /* Popup */
+        .reward-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0,0,0,0.95); padding: 30px; border-radius: 20px; border: 2px solid var(--primary); text-align: center; z-index: 600; color: white; width: 80%; transition: transform 0.3s; }
+        .reward-popup.active { transform: translate(-50%, -50%) scale(1); }
+
+        /* Toast */
+        #toast { visibility: hidden; min-width: 250px; background: rgba(46, 196, 182, 0.9); color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 999; left: 50%; bottom: 100px; transform: translateX(-50%); font-weight: bold; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 100px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 100px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-box { background: #1e293b; padding: 30px; border-radius: 20px; text-align: center; border: 1px solid var(--secondary); width: 85%; }
+
+        /* NEW: Maintenance Mode Styles */
+        #maintenanceOverlay { z-index: 9999; } /* Ensure it's on top of everything */
+        .maintenance-box {
+            border-color: var(--primary);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="toast">Message</div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="user-pill">
+            <div class="u-avatar"><i class="fas fa-user"></i></div>
+            <div style="line-height:1.1;">
+                <div style="font-size:12px; font-weight:bold;" id="uName">Player</div>
+                <div style="font-size:10px; color:var(--secondary);" id="uRank">Novice</div>
+            </div>
+            <i class="fas fa-check-circle" style="color:#3b82f6; font-size:12px;"></i>
+        </div>
+        <div class="header-icons">
+            <div class="head-btn" onclick="openNotif()">
+                <i class="fas fa-bell" style="color:white;"></i>
+                <div class="red-dot" id="notifDot"></div>
+            </div>
+            <div class="head-btn" onclick="openDev()">
+                <i class="fas fa-user-graduate" style="color:var(--secondary); font-size:14px; margin-right:2px;"></i>
+                <i class="fas fa-laptop" style="color:var(--secondary); font-size:14px;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. HOME -->
+    <div id="p-home" class="stage page-active">
+        <div class="gift-icon" onclick="claimDaily()">🎁</div>
+
+        <div class="score-display">
+            <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
+                <div class="small-b-coin">B</div>
+                <h1 id="balance">0</h1>
+            </div>
+            <p style="font-size:12px; color:#aaa; letter-spacing:2px; margin-top: 5px;">B COIN BALANCE</p>
+        </div>
+
+        <div class="coin-container">
+            <div class="coin-wrapper" id="coinBtn">
+                <div class="b-coin"><div class="b-logo">B</div></div>
+            </div>
+        </div>
+
+        <div class="energy-bar"><div class="fill" id="enFill"></div></div>
+        <p style="margin-top:5px; font-size:12px; color:#aaa;">⚡ <span id="enVal">1000</span>/1000</p>
+    </div>
+
+    <!-- Reward Popup -->
+    <div id="rewardPop" class="reward-popup">
+        <h2 style="color:var(--primary); margin-bottom:10px;">CONGRATS!</h2>
+        <div style="font-size:40px; margin-bottom:10px;" id="rewardIcon">🎁</div>
+        <p id="rewardText" style="font-size:18px; font-weight:bold;"></p>
+        <button class="btn" style="margin-top:15px;" onclick="closeReward()">CLAIM</button>
+    </div>
+
+    <!-- Notif Modal -->
+    <div id="notifModal" class="modal" onclick="if(event.target.id==='notifModal')this.style.display='none'">
+        <div class="modal-box">
+            <h3 style="color:white; border-bottom:1px solid #444; padding-bottom:10px;">Notification</h3>
+            <p id="notifMsg" style="font-size:16px; color:#ddd; margin:20px 0;">No new messages.</p>
+            <button class="btn" onclick="document.getElementById('notifModal').style.display='none'">Close</button>
+        </div>
+    </div>
+
+    <!-- 2. TASKS -->
+    <div id="p-task" class="page">
+        <h2 style="text-align:center; margin-bottom:20px;">Earn Coins</h2>
+        <div class="task-container">
+            <div class="glass-panel card" style="margin-bottom:10px;"><div style="display:flex; align-items:center; gap:10px;"><i class="fab fa-telegram" style="color:#229ED9; font-size:24px;"></i><div><h4>Join Telegram</h4><small style="color:#aaa;">+3000</small></div></div><button class="btn" id="btn-def-tg" onclick="doMainTask('tg', 3000)">Start</button></div>
+            <div class="glass-panel card" style="margin-bottom:10px;"><div style="display:flex; align-items:center; gap:10px;"><i class="fab fa-youtube" style="color:red; font-size:24px;"></i><div><h4>Subscribe YT</h4><small style="color:#aaa;">+5000</small></div></div><button class="btn" id="btn-def-yt" onclick="doMainTask('yt', 5000)">Start</button></div>
+            <div class="glass-panel card" style="margin-bottom:10px;"><div style="display:flex; align-items:center; gap:10px;"><i class="fab fa-facebook" style="color:#1877F2; font-size:24px;"></i><div><h4>Follow FB</h4><small style="color:#aaa;">+2500</small></div></div><button class="btn" id="btn-def-fb" onclick="doMainTask('fb', 2500)">Start</button></div>
+            <div class="glass-panel card" style="margin-bottom:10px;"><div style="display:flex; align-items:center; gap:10px;"><i class="fab fa-tiktok" style="color:white; font-size:24px;"></i><div><h4>Follow TikTok</h4><small style="color:#aaa;">+2000</small></div></div><button class="btn" id="btn-def-tt" onclick="doMainTask('tt', 2000)">Start</button></div>
+        </div>
+        <h4 style="text-align:center; margin-top:20px; color:#555;">Extra Tasks</h4>
+        <div id="taskList"></div>
+    </div>
+
+    <!-- 3. BOOST -->
+    <div id="p-boost" class="page">
+        <h2 style="text-align:center; margin-bottom:20px;">Power Ups</h2>
+        <div class="glass-panel card">
+            <div style="display:flex; align-items:center; gap:10px;"><i class="fas fa-hand-pointer card-icon"></i><div><h4>Multitap</h4><small style="color:#aaa;">Lvl <span id="mtLvl">1</span></small></div></div>
+            <button class="btn" onclick="buyMultitap()"><i class="fas fa-coins"></i> <span id="mtCost">500</span></button>
+        </div>
+        <div class="glass-panel card" style="margin-top:10px; border:1px solid var(--secondary);">
+            <div style="display:flex; align-items:center; gap:10px;"><i class="fas fa-bolt card-icon" style="color:var(--secondary);"></i><div><h4>Super Tap ⚡</h4><small style="color:#aaa;">+50/tap for 30s</small></div></div>
+            <button class="btn" style="background:var(--secondary);" onclick="activateSuperTap()">2000</button>
+        </div>
+    </div>
+
+    <!-- 4. LEADERBOARD -->
+    <div id="p-leader" class="page">
+        <h2 style="text-align:center; margin-bottom:20px;">Top Player</h2>
+        <div class="glass-panel" id="leaderboardList" style="padding:10px;"><p style="text-align:center; color:#888;">Loading...</p></div>
+    </div>
+
+    <!-- 5. PROFILE -->
+    <div id="p-profile" class="page">
+        <div class="glass-panel" style="padding:30px; text-align:center;">
+            <div class="u-avatar" style="width:80px; height:80px; font-size:30px; margin:0 auto 15px;"><i class="fas fa-user"></i></div>
+            <h2 style="display:flex; justify-content:center; align-items:center; gap:5px;"><span id="profName">Player</span> <i class="fas fa-check-circle" style="color:#3b82f6;"></i></h2>
+            <p style="color:#aaa; font-size:12px; margin-bottom:15px;">ID: <span id="profId">...</span></p>
+            <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
+                <input type="text" id="newNameInput" placeholder="New Name" style="padding:8px; border-radius:10px; border:1px solid #444; background:#111; color:white;">
+                <button class="btn" onclick="saveName()">Save</button>
+            </div>
+            
+            <div class="glass-panel card" id="wallet-card" style="opacity: 0.5; margin-top:10px;">
+                <div style="display:flex; align-items:center; gap:10px;"><i class="fas fa-wallet" style="color: #3498db; font-size:24px;"></i><div><h4>Wallet Connect</h4><small id="wallet-status">Coming Soon</small></div></div>
+                <button class="btn" id="wallet-btn" disabled onclick="openWalletInput()">Locked</button>
+            </div>
+            <div id="wallet-input-area" style="display:none; margin-top:10px;">
+                <p id="wallet-instruction" style="font-size:12px; color:var(--primary); margin-bottom:5px;">Enter Address:</p>
+                <input type="text" id="wAddr" style="width:100%; padding:10px; background:#111; border:1px solid var(--primary); color:white; border-radius:10px;">
+                <button class="btn" style="width:100%; margin-top:5px;" onclick="submitWallet()">SUBMIT</button>
+            </div>
+            
+            <div style="display:flex; justify-content:space-around; margin-top:20px; border-top:1px solid var(--border); padding-top:20px;">
+                <div><div style="color:var(--primary); font-weight:bold; font-size:20px;" id="profRank">...</div><div style="font-size:10px; color:#888;">RANK</div></div>
+                <div><div style="color:white; font-weight:bold; font-size:20px;" id="profBal">0</div><div style="font-size:10px; color:#888;">COINS</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nav -->
+    <div class="nav-bar glass-panel">
+        <div class="nav-item active" onclick="nav('p-home', this)"><i class="fas fa-coins"></i><span>Tap</span></div>
+        <div class="nav-item" onclick="nav('p-task', this)"><i class="fas fa-tasks"></i><span>Task</span></div>
+        <div class="nav-item" onclick="nav('p-boost', this)"><i class="fas fa-rocket"></i><span>Boost</span></div>
+        <div class="nav-item" onclick="nav('p-leader', this)"><i class="fas fa-trophy"></i><span>Top</span></div>
+        <div class="nav-item" onclick="nav('p-profile', this)"><i class="fas fa-user"></i><span>Profile</span></div>
+    </div>
+
+    <!-- Dev Modal -->
+    <div id="devModal" class="modal" onclick="if(event.target.id==='devModal')this.style.display='none'">
+        <div class="glass-panel modal-box">
+            <h3 style="color:var(--primary);">Developer Info</h3>
+            <p style="margin:15px 0;">Created by <b>Bellal Hossen</b></p>
+            <a href="https://wa.me/8801604064675" style="background:#25D366; color:white; padding:12px 30px; border-radius:30px; text-decoration:none; display:inline-block; font-weight:bold;"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+        </div>
+    </div>
+
+    <!-- NEW: Maintenance Overlay -->
+    <div id="maintenanceOverlay" class="modal">
+        <div class="modal-box maintenance-box">
+            <div style="font-size: 60px;">🤖</div>
+            <h2 style="color: var(--primary); margin: 15px 0;">Under Maintenance</h2>
+            <p id="maintenanceText" style="color: #ddd; font-size: 16px;">Our servers are currently being upgraded. Please check back shortly.</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // 🔥 FIREBASE CONFIG 🔥
+        const firebaseConfig = {
+            apiKey: "AIzaSyBhyXvFgwrEKMGVw0el6mCMh_duZLLnsng",
+            authDomain: "b-coin-02.firebaseapp.com",
+            projectId: "b-coin-02",
+            storageBucket: "b-coin-02.firebasestorage.app",
+            messagingSenderId: "575357998602",
+            appId: "1:575357998602:web:14025bbc512a7ed19af1f3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- INSTANT LOAD SYSTEM ---
+        let localUser = JSON.parse(localStorage.getItem('bcoin_local')) || {};
+        let user = { 
+            id: localStorage.getItem('bcoin_uid'), 
+            balance: localUser.balance || 0,
+            energy: localUser.energy || 1000, 
+            multitap: localUser.multitap || 1, 
+            mtCost: localUser.mtCost || 500, 
+            name: localUser.name || "Player", 
+            completedTasks: localUser.completedTasks || [], 
+            lastDaily: localUser.lastDaily || 0, 
+            wallet: localUser.wallet || "" 
+        };
+        
+        let superMode = false;
+        let superEndTime = 0;
+        let walletInstruction = "Enter Address";
+        let currentNotif = "";
+        let mainLinks = { tg: "", yt: "", fb: "", tt: "" };
+
+        updateUI();
+
+        async function init() {
+            if(!user.id) {
+                user.id = Math.floor(1000000 + Math.random() * 9000000).toString();
+                localStorage.setItem('bcoin_uid', user.id);
+                await setDoc(doc(db, "users", user.id), user);
+            }
+
+            onSnapshot(doc(db, "users", user.id), (snap) => {
+                if(snap.exists()) { 
+                    user = { ...user, ...snap.data() }; 
+                    saveLocal();
+                    updateUI(); 
+                    checkFixedTasks(); 
+                }
+            });
+
+            onSnapshot(doc(db, "settings", "links"), (doc) => {
+                if(doc.exists()) mainLinks = doc.data();
+            });
+
+            onSnapshot(collection(db, "tasks"), (snap) => {
+                const list = document.getElementById('taskList'); list.innerHTML = "";
+                snap.forEach(d => {
+                    let t = d.data(); let isDone = user.completedTasks.includes(d.id);
+                    list.innerHTML += `<div class="glass-panel card"><div style="display:flex; align-items:center; gap:10px;"><i class="${t.icon || 'fas fa-link'}" style="color:var(--primary); font-size:24px;"></i><div><h4>${t.title}</h4><small style="color:#aaa;">+${t.reward}</small></div></div><button class="btn" ${isDone?'disabled':''} onclick="doTask('${d.id}', '${t.url}', ${t.reward})">${isDone?'Done':'Start'}</button></div>`;
+                });
+            });
+            
+            const q = query(collection(db, "users"), orderBy("balance", "desc"), limit(10));
+            onSnapshot(q, (snap) => {
+                let html = ""; let i = 1;
+                snap.forEach(d => {
+                    let u = d.data(); let badge = i===1 ? '🥇' : i===2 ? '🥈' : i===3 ? '🥉' : i;
+                    html += `<div class="rank-item"><div class="rank-num">${badge}</div><div class="rank-name">${u.name}</div><div class="rank-score">${u.balance.toLocaleString()}</div></div>`; i++;
+                });
+                document.getElementById('leaderboardList').innerHTML = html;
+            });
+
+            // --- UPDATED: Wallet, Notif & Maintenance Check ---
+            onSnapshot(doc(db, "settings", "global"), (doc) => {
+                if(doc.exists()) {
+                    let d = doc.data();
+
+                    // Maintenance Check
+                    const overlay = document.getElementById('maintenanceOverlay');
+                    const overlayText = document.getElementById('maintenanceText');
+                    if (d.maintenanceActive && d.maintenanceEndTime > Date.now()) {
+                        overlayText.innerText = d.maintenanceMessage || "Our servers are currently being upgraded. Please check back shortly.";
+                        overlay.style.display = 'flex';
+                    } else {
+                        overlay.style.display = 'none';
+                    }
+
+                    // Wallet & Notif
+                    if(d.walletEnabled) {
+                        document.getElementById('wallet-card').style.opacity = "1";
+                        document.getElementById('wallet-btn').disabled = false;
+                        document.getElementById('wallet-btn').innerText = "Connect";
+                        document.getElementById('wallet-status').innerText = "Ready";
+                        walletInstruction = d.walletText || "Enter Address";
+                        document.getElementById('wallet-instruction').innerText = walletInstruction;
+                    }
+                    if(d.notification && d.notification !== currentNotif) {
+                        currentNotif = d.notification;
+                        document.getElementById('notifDot').style.display = 'block';
+                    }
+                }
+            });
+
+            setInterval(() => {
+                if(user.energy < 1000) {
+                    user.energy += 3; if(user.energy > 1000) user.energy = 1000;
+                    updateUI();
+                    saveLocal();
+                    if(user.energy%15===0) updateDoc(doc(db, "users", user.id), { energy: user.energy });
+                }
+            }, 1000);
+        }
+
+        function saveLocal() {
+            localStorage.setItem('bcoin_local', JSON.stringify(user));
+        }
+
+        function updateUI() {
+            document.getElementById('balance').innerText = user.balance.toLocaleString();
+            document.getElementById('profBal').innerText = user.balance.toLocaleString();
+            document.getElementById('enVal').innerText = Math.floor(user.energy);
+            document.getElementById('enFill').style.width = (user.energy/1000*100)+'%';
+            document.getElementById('uName').innerText = user.name;
+            document.getElementById('profName').innerText = user.name;
+            document.getElementById('profId').innerText = user.id;
+            document.getElementById('newNameInput').value = user.name;
+            document.getElementById('mtLvl').innerText = user.multitap;
+            document.getElementById('mtCost').innerText = user.mtCost;
+            let r = "Bronze"; if(user.balance>10000) r="Silver"; if(user.balance>50000) r="Gold"; if(user.balance>100000) r="Diamond"; if(user.balance>500000) r="Legend";
+            document.getElementById('uRank').innerText = r; document.getElementById('profRank').innerText = r;
+            if(user.wallet && user.wallet.length > 5) {
+                document.getElementById('wallet-btn').innerText = "Submitted";
+                document.getElementById('wallet-btn').disabled = true;
+                document.getElementById('wallet-btn').style.background = "#2ecc71";
+            }
+        }
+
+        const coin = document.getElementById('coinBtn');
+        const coinInner = document.querySelector('.coin-wrapper');
+        
+        coin.addEventListener('pointerdown', (e) => {
+            let gain = user.multitap;
+            if(superMode) {
+                if(Date.now() > superEndTime) { superMode = false; coinInner.classList.remove('electric-mode'); } 
+                else { gain = 50; }
+            }
+            if(user.energy >= 1 || superMode) {
+                if(!superMode) user.energy--;
+                user.balance += gain;
+                
+                let f = document.createElement('div'); f.className = 'float-num'; f.innerText = '+'+gain;
+                f.style.left = e.clientX + 'px'; f.style.top = (e.clientY - 50) + 'px';
+                if(superMode) { f.style.color = "#00ffff"; f.style.textShadow = "0 0 10px blue"; }
+                document.body.appendChild(f); setTimeout(()=>f.remove(), 600);
+                
+                if(navigator.vibrate) navigator.vibrate(superMode ? 50 : 30);
+                updateUI();
+                saveLocal();
+                updateDoc(doc(db, "users", user.id), { balance: user.balance, energy: user.energy });
+            }
+
+            const rect = coin.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            const rotateX = (y / (rect.height / 2)) * -20;
+            const rotateY = (x / (rect.width / 2)) * 20;
+            coinInner.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(0.95)`;
+        });
+
+        coin.addEventListener('pointerup', () => { coinInner.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)`; });
+        coin.addEventListener('pointerleave', () => { coinInner.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)`; });
+
+        window.doMainTask = (key, reward) => {
+            let id = 'def-' + key; if(user.completedTasks.includes(id)) return;
+            let url = mainLinks[key];
+            if(!url) {
+                if(key === 'tg') url = "https://t.me/adambhai75"; if(key === 'yt') url = "https://youtube.com"; if(key === 'fb') url = "https://facebook.com"; if(key === 'tt') url = "https://tiktok.com";
+            }
+            window.open(url, '_blank');
+            setTimeout(() => {
+                user.balance += reward; user.completedTasks.push(id); saveLocal();
+                updateDoc(doc(db, "users", user.id), { balance: user.balance, completedTasks: user.completedTasks });
+                showRewardPopup(reward + " Coins", "🔥"); updateUI(); checkFixedTasks();
+            }, 5000);
+        };
+
+        window.claimDaily = () => {
+            let now = Date.now();
+            if(now - (user.lastDaily || 0) > 86400000) {
+                user.balance += 500; user.lastDaily = now; saveLocal();
+                updateDoc(doc(db, "users", user.id), { balance: user.balance, lastDaily: now });
+                showRewardPopup("Daily Bonus 500!", "🎁"); updateUI();
+            } else {
+                let timeLeft = Math.floor((86400000 - (now - user.lastDaily))/3600000);
+                showToast(`Wait ${timeLeft} hours more!`);
+            }
+        };
+
+        window.openNotif = () => {
+            document.getElementById('notifMsg').innerText = currentNotif || "No new messages.";
+            document.getElementById('notifModal').style.display = 'flex';
+            document.getElementById('notifDot').style.display = 'none';
+        };
+
+        function showRewardPopup(text, icon) {
+            document.getElementById('rewardText').innerText = text;
+            document.getElementById('rewardIcon').innerText = icon;
+            document.getElementById('rewardPop').classList.add('active');
+        }
+        window.closeReward = () => document.getElementById('rewardPop').classList.remove('active');
+
+        window.buyMultitap = () => { if(user.balance >= user.mtCost) { user.balance -= user.mtCost; user.multitap++; user.mtCost *= 2; saveLocal(); updateDoc(doc(db, "users", user.id), { balance: user.balance, multitap: user.multitap, mtCost: user.mtCost }); } else showToast("Not enough coins!"); }
+        
+        window.activateSuperTap = () => {
+            if(!superMode) {
+                if(user.balance >= 2000) {
+                    user.balance -= 2000; superMode = true; superEndTime = Date.now() + 30000; 
+                    coinInner.classList.add('electric-mode');
+                    updateDoc(doc(db, "users", user.id), { balance: user.balance });
+                    showToast("⚡ SUPER MODE ON! ⚡");
+                    setTimeout(() => coinInner.classList.remove('electric-mode'), 30000);
+                } else showToast("Need 2000 Coins");
+            }
+        }
+        
+        window.doTask = (id, url, reward) => { window.open(url, '_blank'); setTimeout(() => { user.balance += parseInt(reward); let d = user.completedTasks; d.push(id); saveLocal(); updateDoc(doc(db, "users", user.id), { balance: user.balance, completedTasks: d }); showToast("Task Complete!"); }, 5000); }
+        window.saveName = () => { let n = document.getElementById('newNameInput').value; if(n.length > 2) { updateDoc(doc(db, "users", user.id), { name: n }); showToast("Name Updated"); } }
+        window.checkFixedTasks = () => { ['def-tg', 'def-yt', 'def-fb', 'def-tt'].forEach(id => { if(user.completedTasks.includes(id)) { let btn = document.getElementById('btn-'+id); if(btn) { btn.disabled = true; btn.innerText = "Done"; } } }); }
+        window.nav = (pid, el) => { document.querySelectorAll('.page, .stage').forEach(p=>p.style.display='none'); document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active')); if(pid === 'p-home') document.getElementById(pid).style.display='flex'; else document.getElementById(pid).style.display='flex'; el.classList.add('active'); };
+        window.openDev = () => document.getElementById('devModal').style.display = 'flex';
+        function showToast(msg) { let t = document.getElementById('toast'); t.innerText = msg; t.className = "show"; setTimeout(()=>t.className = t.className.replace("show", ""), 3000); }
+        
+        window.openWalletInput = () => document.getElementById('wallet-input-area').style.display='block';
+        window.submitWallet = () => { let addr = document.getElementById('wAddr').value; if(addr.length > 5) { updateDoc(doc(db, "users", user.id), { wallet: addr }); alert("Wallet Submitted!"); document.getElementById('wallet-input-area').style.display='none'; } }
+
+        init();
+    </script>
+</body>
+</html>
